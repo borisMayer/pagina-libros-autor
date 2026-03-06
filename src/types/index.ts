@@ -1,4 +1,9 @@
+import type { Decimal } from '@prisma/client/runtime/library';
+
 export type Locale = 'es' | 'en';
+
+// Decimal puede venir como tipo Prisma o como string/number según el contexto
+type AmountType = Decimal | string | number;
 
 export interface BookWithPrices {
   id: string;
@@ -18,7 +23,7 @@ export interface BookWithPrices {
   publishedAt: Date | null;
   prices: {
     currency: string;
-    amount: string | number;
+    amount: AmountType;
     isActive: boolean;
   }[];
 }
@@ -48,7 +53,7 @@ export interface SaleWithBook {
   bookId: string;
   buyerEmail: string;
   buyerName: string | null;
-  amount: string | number;
+  amount: AmountType;
   currency: string;
   status: string;
   downloadToken: string | null;

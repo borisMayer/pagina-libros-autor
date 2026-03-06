@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/prisma';
 import BookGrid from '@/components/books/BookGrid';
+import type { BookWithPrices } from '@/types';
 import type { Metadata } from 'next';
 
 type Props = { params: Promise<{ locale: string }> };
@@ -30,7 +31,7 @@ export default async function LibrosPage({ params }: Props) {
       {books.length === 0 ? (
         <p className="text-ink/50 font-body text-center py-20">{t('noBooks')}</p>
       ) : (
-        <BookGrid books={books} locale={locale as 'es' | 'en'} />
+        <BookGrid books={books as unknown as BookWithPrices[]} locale={locale as 'es' | 'en'} />
       )}
     </div>
   );
