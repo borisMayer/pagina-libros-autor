@@ -5,7 +5,6 @@ import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useState } from 'react';
 
 export default function Header() {
-  const t = useLocale();
   const nav = useTranslations('nav');
   const locale = useLocale();
   const router = useRouter();
@@ -20,12 +19,10 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-ink/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
         <Link href="/" className="font-display text-xl font-bold text-white hover:text-brand-400 transition-colors">
           Boris Mayer
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
           <Link href="/biografia" className="text-white/80 hover:text-white font-body text-sm transition-colors">
             {nav('biography')}
@@ -41,7 +38,6 @@ export default function Header() {
           </button>
         </nav>
 
-        {/* Mobile menu button */}
         <button
           className="md:hidden text-white p-2"
           onClick={() => setOpen(!open)}
@@ -53,7 +49,6 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open && (
         <div className="md:hidden bg-ink border-t border-white/10 px-6 py-4 flex flex-col gap-4">
           <Link href="/biografia" onClick={() => setOpen(false)} className="text-white/80 font-body text-sm py-2">

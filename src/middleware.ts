@@ -1,7 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
-import { auth } from './lib/auth';
+import { getToken } from 'next-auth/jwt';
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -10,15 +10,20 @@ export default async function middleware(req: NextRequest) {
 
   // Proteger rutas /admin (excepto /admin/login)
   if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
-    const session = await auth();
-    if (!session?.user) {
+    const token = await getToken({
+      req,
+      secret: process.env.AUTH_SECRET,
+    });
+
+    if (!token || token.role !== 'ADMIN') {
       const loginUrl = new URL('/admin/login', req.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
+    return NextResponse.next();
   }
 
-  // Aplicar i18n middleware para rutas públicas
+  // Aplicar i18n middleware para rutas públicas (excluir /api y /admin)
   if (!pathname.startsWith('/admin') && !pathname.startsWith('/api')) {
     return intlMiddleware(req);
   }
@@ -28,8 +33,6 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Rutas i18n: excluir archivos estáticos y API
     '/((?!_next|_vercel|.*\\..*).*)',
-    '/admin/:path*',
   ],
 };
