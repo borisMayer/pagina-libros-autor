@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+:root {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', system-ui, sans-serif;
+
+  --color-ink: #1a1a2e;
+  --color-parchment: #fdf8f0;
+  --color-brand-900: #1a1a5e;
+  --color-brand-600: #4a52ea;
+  --color-brand-400: #8098fa;
+
+  --shadow-book: 4px 4px 12px rgba(26,26,46,0.18), 1px 1px 3px rgba(26,26,46,0.12);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-parchment);
+  color: var(--color-ink);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+}
+
+/* Book card shadow */
+.book-shadow {
+  box-shadow: var(--shadow-book);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+.book-shadow:hover {
+  box-shadow: 8px 12px 28px rgba(26,26,46,0.22), 2px 2px 6px rgba(26,26,46,0.14);
+  transform: translateY(-4px);
+}
+
+/* Smooth page transitions */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* Admin sidebar */
+.admin-nav-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all;
+}
+.admin-nav-link:hover {
+  @apply bg-brand-50 text-brand-700;
+}
+.admin-nav-link.active {
+  @apply bg-brand-100 text-brand-900;
+}

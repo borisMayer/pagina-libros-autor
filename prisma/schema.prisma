@@ -1,0 +1,150 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── AUTOR ───────────────────────────────────────────────────────────────────
+
+model Author {
+  id          String      @id @default(cuid())
+  nameEs      String
+  nameEn      String
+  bioEs       String      @db.Text
+  bioEn       String      @db.Text
+  photoUrl    String?
+  birthDate   DateTime?
+  nationality String?
+  website     String?
+  twitter     String?
+  instagram   String?
+  milestones  Milestone[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Milestone {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  year      Int
+  labelEs   String
+  labelEn   String
+  createdAt DateTime @default(now())
+}
+
+// ─── LIBROS ──────────────────────────────────────────────────────────────────
+
+model Book {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  titleEs       String
+  titleEn       String
+  descriptionEs String    @db.Text
+  descriptionEn String    @db.Text
+  authorName    String
+  isbn          String?
+  publishedAt   DateTime?
+  coverUrl      String
+  pdfUrl        String?
+  epubUrl       String?
+  excerptPdfUrl String?
+  pageCount     Int?
+  genre         String?
+  isPublished   Boolean   @default(false)
+  prices        Price[]
+  sales         Sale[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+}
+
+// ─── PRECIOS ─────────────────────────────────────────────────────────────────
+
+model Price {
+  id       String   @id @default(cuid())
+  bookId   String
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  currency Currency
+  amount   Decimal  @db.Decimal(10, 2)
+  isActive Boolean  @default(true)
+
+  @@unique([bookId, currency])
+}
+
+enum Currency {
+  ARS
+  USD
+  EUR
+  MXN
+  CLP
+  COP
+}
+
+// ─── VENTAS ──────────────────────────────────────────────────────────────────
+
+model Sale {
+  id                String      @id @default(cuid())
+  bookId            String
+  book              Book        @relation(fields: [bookId], references: [id])
+  buyerEmail        String
+  buyerName         String?
+  amount            Decimal     @db.Decimal(10, 2)
+  currency          Currency
+  status            SaleStatus  @default(PENDING)
+  mpPreferenceId    String?     @unique
+  mpPaymentId       String?     @unique
+  mpOrderId         String?
+  mpPayerEmail      String?
+  downloadToken     String?     @unique
+  downloadExpiresAt DateTime?
+  downloadCount     Int         @default(0)
+  maxDownloads      Int         @default(3)
+  downloadLogs      DownloadLog[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@index([buyerEmail])
+  @@index([status])
+  @@index([mpPaymentId])
+}
+
+enum SaleStatus {
+  PENDING
+  PROCESSING
+  APPROVED
+  REJECTED
+  REFUNDED
+  CANCELLED
+}
+
+// ─── LOG DE DESCARGAS ─────────────────────────────────────────────────────────
+
+model DownloadLog {
+  id           String   @id @default(cuid())
+  saleId       String
+  sale         Sale     @relation(fields: [saleId], references: [id])
+  format       String
+  ip           String?
+  userAgent    String?
+  downloadedAt DateTime @default(now())
+}
+
+// ─── ADMIN USER ──────────────────────────────────────────────────────────────
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
