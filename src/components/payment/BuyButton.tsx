@@ -24,6 +24,7 @@ const CURRENCY_LABELS: Record<string, string> = {
 
 export default function BuyButton({ book, locale }: Props) {
   const t = useTranslations('payment');
+  const tb = useTranslations('books');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [currency, setCurrency] = useState(book.prices[0]?.currency ?? 'ARS');
@@ -33,16 +34,17 @@ export default function BuyButton({ book, locale }: Props) {
 
   if (book.prices.length === 0) {
     return (
-      <p className="text-ink/50 font-body text-sm">
-        {useTranslations('books')('outOfStock')}
-      </p>
+      <p className="text-ink/50 font-body text-sm">{tb('outOfStock')}</p>
     );
   }
 
   const selectedPrice = book.prices.find(p => p.currency === currency) ?? book.prices[0];
 
   const handleBuy = async () => {
-    if (!email) { setError(locale === 'es' ? 'Ingresá tu email' : 'Enter your email'); return; }
+    if (!email) {
+      setError(locale === 'es' ? 'Ingresá tu email' : 'Enter your email');
+      return;
+    }
     setLoading(true);
     setError('');
 
@@ -50,7 +52,13 @@ export default function BuyButton({ book, locale }: Props) {
       const res = await fetch('/api/payment/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookId: book.id, currency, buyerEmail: email, buyerName: name, locale }),
+        body: JSON.stringify({
+          bookId: book.id,
+          currency,
+          buyerEmail: email,
+          buyerName: name,
+          locale,
+        }),
       });
 
       const data = await res.json();
@@ -61,11 +69,13 @@ export default function BuyButton({ book, locale }: Props) {
         return;
       }
 
-      // Redirigir a Mercado Pago Checkout
       window.location.href = data.checkoutUrl;
-
     } catch {
-      setError(locale === 'es' ? 'Error de conexión. Intentá de nuevo.' : 'Connection error. Please try again.');
+      setError(
+        locale === 'es'
+          ? 'Error de conexión. Intentá de nuevo.'
+          : 'Connection error. Please try again.'
+      );
       setLoading(false);
     }
   };
@@ -123,7 +133,7 @@ export default function BuyButton({ book, locale }: Props) {
         />
       </div>
 
-      {/* Name (optional) */}
+      {/* Name */}
       <div>
         <label className="block text-xs font-semibold text-ink/60 uppercase tracking-wide mb-2 font-body">
           {t('name')}
@@ -152,7 +162,13 @@ export default function BuyButton({ book, locale }: Props) {
             </>
           ) : (
             <>
-              {t('buyWith')} · {selectedPrice ? new Intl.NumberFormat('es-AR', { style: 'currency', currency: selectedPrice.currency }).format(selectedPrice.amount) : ''}
+              {t('buyWith')}
+              {selectedPrice
+                ? ` · ${new Intl.NumberFormat('es-AR', {
+                    style: 'currency',
+                    currency: selectedPrice.currency,
+                  }).format(selectedPrice.amount)}`
+                : ''}
             </>
           )}
         </button>
