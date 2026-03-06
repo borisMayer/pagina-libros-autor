@@ -15,7 +15,10 @@ export default function BookCard({ book, locale }: Props) {
 
   return (
     <article className="group bg-white rounded-xl overflow-hidden book-shadow flex flex-col">
-      <Link href={`/libros/${book.slug}`} className="relative block overflow-hidden">
+      <Link
+        href={{ pathname: '/libros/[slug]', params: { slug: book.slug } }}
+        className="relative block overflow-hidden"
+      >
         <div className="aspect-[2/3] relative">
           <Image
             src={book.coverUrl}
@@ -31,7 +34,7 @@ export default function BookCard({ book, locale }: Props) {
         <p className="text-xs text-brand-600 font-semibold tracking-widest uppercase mb-1 font-body">
           {book.genre ?? ''}
         </p>
-        <Link href={`/libros/${book.slug}`}>
+        <Link href={{ pathname: '/libros/[slug]', params: { slug: book.slug } }}>
           <h3 className="font-display text-lg font-bold text-ink leading-tight mb-1 hover:text-brand-700 transition-colors line-clamp-2">
             {title}
           </h3>
@@ -48,7 +51,7 @@ export default function BookCard({ book, locale }: Props) {
           )}
 
           <Link
-            href={`/libros/${book.slug}`}
+            href={{ pathname: '/libros/[slug]', params: { slug: book.slug } }}
             className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold rounded-lg transition-all font-body"
           >
             {locale === 'es' ? 'Ver detalles' : 'View details'}
