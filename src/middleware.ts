@@ -4,21 +4,22 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
+// Rutas que NO deben pasar por el middleware de i18n
+const BYPASS_PATHS = [
+  '/admin',
+  '/auth-admin',
+  '/api',
+];
+
 export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // ── API routes — sin middleware ───────────────────────────────────────────
-  if (pathname.startsWith('/api')) {
+  // Dejar pasar sin i18n: admin, auth-admin, api
+  if (BYPASS_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next();
   }
 
-  // ── Rutas admin — la protección se hace en cada layout/page con auth() ────
-  // El middleware NO toca /admin para evitar problemas con Edge Runtime
-  if (pathname.startsWith('/admin')) {
-    return NextResponse.next();
-  }
-
-  // ── Rutas públicas — aplicar i18n ─────────────────────────────────────────
+  // Rutas públicas → aplicar i18n
   return intlMiddleware(req);
 }
 
