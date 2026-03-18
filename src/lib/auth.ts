@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: {
-    signIn: '/admin/login',
+    signIn: '/auth-admin',
   },
   session: { strategy: 'jwt' },
   secret: process.env.AUTH_SECRET,

@@ -44,7 +44,7 @@ export default function AdminSidebar() {
           <span className="font-body text-sm">Ver sitio</span>
         </Link>
         <button
-          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          onClick={() => signOut({ callbackUrl: '/auth-admin' })}
           className="admin-nav-link text-white/50 hover:bg-white/10 hover:text-white w-full text-left"
         >
           <span>🚪</span>
