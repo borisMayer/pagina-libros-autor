@@ -17,7 +17,7 @@ export default function AdminSidebar() {
   return (
     <aside className="w-64 bg-ink min-h-screen flex flex-col py-6 px-4 shrink-0">
       <div className="mb-8 px-2">
-        <p className="font-display text-lg font-bold text-white">Boris Mayer</p>
+        <p className="font-display text-lg font-bold text-white">Andrew Myer</p>
         <p className="text-white/40 text-xs font-body mt-1">Administración</p>
       </div>
 

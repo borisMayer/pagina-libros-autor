@@ -17,15 +17,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'nav' });
   return {
     title: {
-      template: '%s | Boris Mayer',
-      default: 'Boris Mayer — Escritor',
+      template: '%s | Andrew Myer',
+      default: 'Andrew Myer — Escritor',
     },
     description:
       locale === 'es'
-        ? 'Sitio oficial de Boris Mayer, escritor argentino. Conocé sus libros, su biografía y comprá sus obras digitales.'
-        : 'Official site of Boris Mayer, Argentine writer. Discover his books, biography and purchase his digital works.',
+        ? 'Sitio oficial de Andrew Myer, escritor argentino. Conocé sus libros, su biografía y comprá sus obras digitales.'
+        : 'Official site of Andrew Myer, Argentine writer. Discover his books, biography and purchase his digital works.',
     openGraph: {
-      siteName: 'Boris Mayer',
+      siteName: 'Andrew Myer',
       locale:    locale === 'es' ? 'es_AR' : 'en_US',
     },
   };

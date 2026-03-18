@@ -36,7 +36,7 @@ export default async function HomePage({ params }: Props) {
             {t('hero')}
           </p>
           <h1 className="font-display text-5xl md:text-7xl text-white font-bold leading-tight mb-6">
-            {author?.nameEs ?? 'Boris Mayer'}
+            {author?.nameEs ?? 'Andrew Myer'}
           </h1>
           <p className="text-gray-300 text-xl md:text-2xl font-body font-light mb-10 max-w-2xl mx-auto">
             {t('subtitle')}

@@ -21,7 +21,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-ink/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="font-display text-xl font-bold text-white hover:text-brand-400 transition-colors">
-          Boris Mayer
+          Andrew Myer
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">

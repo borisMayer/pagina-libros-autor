@@ -27,7 +27,7 @@ export default function BookForm({ initialData }: { initialData?: BookFormData }
     titleEn:       initialData?.titleEn       ?? '',
     descriptionEs: initialData?.descriptionEs ?? '',
     descriptionEn: initialData?.descriptionEn ?? '',
-    authorName:    initialData?.authorName    ?? 'Boris Mayer',
+    authorName:    initialData?.authorName    ?? 'Andrew Myer',
     coverUrl:      initialData?.coverUrl      ?? '',
     pdfUrl:        initialData?.pdfUrl        ?? '',
     epubUrl:       initialData?.epubUrl       ?? '',

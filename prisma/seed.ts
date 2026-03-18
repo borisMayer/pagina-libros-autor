@@ -22,8 +22,8 @@ async function main() {
     update: {},
     create: {
       id: 'author-main',
-      nameEs: 'Boris Mayer',
-      nameEn: 'Boris Mayer',
+      nameEs: 'Andrew Myer',
+      nameEn: 'Andrew Myer',
       bioEs:
         'Escritor argentino nacido en Buenos Aires. Autor de múltiples novelas y ensayos que exploran la identidad latinoamericana, la memoria y el tiempo. Su obra ha sido traducida a varios idiomas y reconocida con premios nacionales e internacionales.',
       bioEn:
@@ -52,7 +52,7 @@ async function main() {
         'Una novela profunda sobre la memoria y el olvido. Dos hermanos separados por décadas se reencuentran en el umbral de la vejez y deben reconciliar sus versiones del pasado.',
       descriptionEn:
         'A profound novel about memory and forgetting. Two siblings separated for decades reunite on the threshold of old age and must reconcile their versions of the past.',
-      authorName: 'Boris Mayer',
+      authorName: 'Andrew Myer',
       coverUrl: 'https://placehold.co/400x600/1a1a2e/ffffff?text=El+Tiempo+Entre+Nosotros',
       pageCount: 320,
       genre: 'Novela',

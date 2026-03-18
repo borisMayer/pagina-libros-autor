@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
-            <p className="font-display text-3xl font-bold text-ink">Boris Mayer</p>
+            <p className="font-display text-3xl font-bold text-ink">Andrew Myer</p>
             <p className="text-ink/50 font-body text-sm mt-1">Panel de administración</p>
           </div>
 
