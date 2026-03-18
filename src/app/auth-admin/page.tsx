@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
 
 function LoginForm() {
   const router = useRouter();
@@ -20,78 +18,96 @@ function LoginForm() {
     setLoading(true);
     setError('');
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      // NextAuth v5 usa /api/auth/callback/credentials con CSRF token
+      // Primero obtenemos el CSRF token
+      const csrfRes  = await fetch('/api/auth/csrf');
+      const csrfData = await csrfRes.json();
+      const csrfToken = csrfData.csrfToken;
 
-    if (result?.error) {
-      setError('Credenciales incorrectas');
+      // Llamada directa al endpoint de NextAuth v5
+      const res = await fetch('/api/auth/callback/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          email,
+          password,
+          csrfToken,
+          callbackUrl,
+          json: 'true',
+        }),
+        redirect: 'follow',
+      });
+
+      // Si redirigió al admin, el login fue exitoso
+      if (res.url.includes('/admin') && !res.url.includes('/auth-admin')) {
+        router.push('/admin');
+        router.refresh();
+        return;
+      }
+
+      // Verificar si hay sesión activa
+      const sessionRes  = await fetch('/api/auth/session');
+      const sessionData = await sessionRes.json();
+
+      if (sessionData?.user?.email) {
+        router.push(callbackUrl);
+        router.refresh();
+        return;
+      }
+
+      setError('Credenciales incorrectas. Verifica email y contraseña.');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Error de conexión. Intenta de nuevo.');
+    } finally {
       setLoading(false);
-    } else {
-      router.push(callbackUrl);
-      router.refresh();
     }
   };
 
+  const s: Record<string, React.CSSProperties> = {
+    page:     { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb', padding: '1.5rem' },
+    card:     { width: '100%', maxWidth: '420px', backgroundColor: '#fff', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: '2.5rem' },
+    title:    { fontFamily: 'Georgia, serif', fontSize: '1.75rem', fontWeight: 700, color: '#1a1a2e', textAlign: 'center', margin: 0 },
+    subtitle: { color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', marginTop: '6px', marginBottom: '2rem' },
+    label:    { display: 'block', fontSize: '0.7rem', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: '6px' },
+    input:    { width: '100%', padding: '0.75rem 1rem', borderRadius: '10px', border: '1.5px solid #e5e7eb', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' as const, transition: 'border-color 0.2s' },
+    field:    { marginBottom: '1.25rem' },
+    error:    { backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '0.75rem 1rem', color: '#dc2626', fontSize: '0.875rem', marginBottom: '1.25rem' },
+    btn:      { width: '100%', padding: '0.85rem', backgroundColor: '#1a1a2e', color: '#fff', fontWeight: 700, borderRadius: '10px', border: 'none', fontSize: '1rem', cursor: 'pointer', transition: 'opacity 0.2s' },
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <p style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#1a1a2e' }}>
-              Andrew Myer
-            </p>
-            <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '4px' }}>
-              Panel de administración
-            </p>
+    <div style={s.page}>
+      <div style={s.card}>
+        <p style={s.title}>Andrew Myer</p>
+        <p style={s.subtitle}>Panel de administración</p>
+
+        <form onSubmit={handleSubmit}>
+          <div style={s.field}>
+            <label style={s.label}>Correo electrónico</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)}
+              required style={s.input} placeholder="admin@andrewmyer.com"
+              autoComplete="email"
+            />
           </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #e5e7eb', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
-                placeholder="admin@ejemplo.com"
-              />
-            </div>
+          <div style={s.field}>
+            <label style={s.label}>Contraseña</label>
+            <input
+              type="password" value={password} onChange={e => setPassword(e.target.value)}
+              required style={s.input} placeholder="••••••••"
+              autoComplete="current-password"
+            />
+          </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
-                Contraseña
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '0.75rem', border: '1px solid #e5e7eb', fontSize: '1rem', outline: 'none', boxSizing: 'border-box' }}
-                placeholder="••••••••"
-              />
-            </div>
+          {error && <div style={s.error}>{error}</div>}
 
-            {error && (
-              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.75rem', padding: '0.75rem 1rem', color: '#dc2626', fontSize: '0.875rem' }}>
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ width: '100%', padding: '0.75rem', backgroundColor: '#1a1a2e', color: 'white', fontWeight: 700, borderRadius: '0.75rem', border: 'none', fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}
-            >
-              {loading ? 'Ingresando...' : 'Iniciar sesión'}
-            </button>
-          </form>
-        </div>
+          <button type="submit" disabled={loading} style={{ ...s.btn, opacity: loading ? 0.6 : 1 }}>
+            {loading ? 'Verificando...' : 'Iniciar sesión'}
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -99,7 +115,11 @@ function LoginForm() {
 
 export default function AuthAdminPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Cargando...</div>}>
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9fafb' }}>
+        <p style={{ color: '#9ca3af' }}>Cargando...</p>
+      </div>
+    }>
       <LoginForm />
     </Suspense>
   );
