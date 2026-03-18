@@ -8,7 +8,7 @@
   },
   "home": {
     "hero": "Bienvenido al mundo literario de",
-    "subtitle": "Descubrí sus libros, su historia y su obra.",
+    "subtitle": "Descubre sus libros, su historia y su obra.",
     "cta": "Ver libros",
     "ctaBio": "Conocer al autor"
   },
@@ -46,7 +46,7 @@
     "pending": "Procesando tu pago...",
     "pendingMessage": "Esto puede tardar unos segundos.",
     "error": "Error en el pago",
-    "errorMessage": "No se pudo procesar el pago. Por favor, intentá de nuevo.",
+    "errorMessage": "No se pudo procesar el pago. Por favor, intenta de nuevo.",
     "retry": "Intentar de nuevo",
     "email": "Tu correo electrónico",
     "name": "Tu nombre (opcional)",

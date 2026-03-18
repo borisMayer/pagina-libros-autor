@@ -25,13 +25,13 @@ async function main() {
       nameEs: 'Andrew Myer',
       nameEn: 'Andrew Myer',
       bioEs:
-        'Escritor argentino nacido en Buenos Aires. Autor de múltiples novelas y ensayos que exploran la identidad latinoamericana, la memoria y el tiempo. Su obra ha sido traducida a varios idiomas y reconocida con premios nacionales e internacionales.',
+        'Escritor de literatura latinoamericana. Autor de múltiples novelas y ensayos que exploran la identidad latinoamericana, la memoria y el tiempo. Su obra ha sido traducida a varios idiomas y reconocida con premios nacionales e internacionales.',
       bioEn:
-        'Argentine writer born in Buenos Aires. Author of multiple novels and essays exploring Latin American identity, memory, and time. His work has been translated into several languages and recognized with national and international awards.',
+        'Latin American fiction writer. Author of multiple novels and essays exploring Latin American identity, memory, and time. His work has been translated into several languages and recognized with national and international awards.',
       nationality: 'Argentina',
       milestones: {
         create: [
-          { year: 1980, labelEs: 'Nacimiento en Buenos Aires', labelEn: 'Born in Buenos Aires' },
+          { year: 1980, labelEs: 'Nacimiento', labelEn: 'Birth' },
           { year: 2005, labelEs: 'Primera novela publicada', labelEn: 'First novel published' },
           { year: 2010, labelEs: 'Premio Nacional de Literatura', labelEn: 'National Literature Award' },
           { year: 2018, labelEs: 'Traducción al inglés y francés', labelEn: 'Translation into English and French' },

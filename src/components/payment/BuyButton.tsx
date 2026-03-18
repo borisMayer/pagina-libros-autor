@@ -42,7 +42,7 @@ export default function BuyButton({ book, locale }: Props) {
 
   const handleBuy = async () => {
     if (!email) {
-      setError(locale === 'es' ? 'Ingresá tu email' : 'Enter your email');
+      setError(locale === 'es' ? 'Ingresa tu email' : 'Enter your email');
       return;
     }
     setLoading(true);
@@ -73,7 +73,7 @@ export default function BuyButton({ book, locale }: Props) {
     } catch {
       setError(
         locale === 'es'
-          ? 'Error de conexión. Intentá de nuevo.'
+          ? 'Error de conexión. Intenta de nuevo.'
           : 'Connection error. Please try again.'
       );
       setLoading(false);

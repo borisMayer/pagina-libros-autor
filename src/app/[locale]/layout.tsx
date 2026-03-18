@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     description:
       locale === 'es'
-        ? 'Sitio oficial de Andrew Myer, escritor argentino. Conocé sus libros, su biografía y comprá sus obras digitales.'
+        ? 'Sitio oficial de Andrew Myer, escritor. Descubre sus libros, su biografía y compra sus obras digitales.'
         : 'Official site of Andrew Myer, Argentine writer. Discover his books, biography and purchase his digital works.',
     openGraph: {
       siteName: 'Andrew Myer',
