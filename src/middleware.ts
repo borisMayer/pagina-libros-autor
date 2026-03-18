@@ -1,40 +1,37 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextRequest, NextResponse } from 'next/server';
 import { routing } from './i18n/routing';
-import { getToken } from 'next-auth/jwt';
 
 const intlMiddleware = createMiddleware(routing);
-
-// Rutas admin que NO requieren autenticación
-const PUBLIC_ADMIN_PATHS = ['/admin/login'];
 
 export default async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  // ── Rutas admin ──────────────────────────────────────────────────────────
+  // ── API routes — sin middleware ───────────────────────────────────────────
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // ── Admin login — SIEMPRE pasar, sin verificación ─────────────────────────
+  if (pathname === '/admin/login' || pathname.startsWith('/admin/login?')) {
+    return NextResponse.next();
+  }
+
+  // ── Resto del admin — verificar cookie de sesión ──────────────────────────
   if (pathname.startsWith('/admin')) {
-    // Dejar pasar la página de login siempre (evita redirect loop)
-    if (PUBLIC_ADMIN_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))) {
-      return NextResponse.next();
-    }
+    // Verificar si existe la cookie de sesión de NextAuth v5
+    const sessionToken =
+      req.cookies.get('authjs.session-token')?.value ??
+      req.cookies.get('__Secure-authjs.session-token')?.value ??
+      req.cookies.get('next-auth.session-token')?.value ??
+      req.cookies.get('__Secure-next-auth.session-token')?.value;
 
-    // Verificar sesión para el resto del admin
-    const token = await getToken({
-      req,
-      secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
-    });
-
-    if (!token || token.role !== 'ADMIN') {
+    if (!sessionToken) {
       const loginUrl = new URL('/admin/login', req.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next();
-  }
-
-  // ── API routes — sin middleware ───────────────────────────────────────────
-  if (pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 
