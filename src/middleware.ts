@@ -4,7 +4,7 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createMiddleware(routing);
 
-export default async function middleware(req: NextRequest) {
+export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   // ── API routes — sin middleware ───────────────────────────────────────────
@@ -12,26 +12,9 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Admin login — SIEMPRE pasar, sin verificación ─────────────────────────
-  if (pathname === '/admin/login' || pathname.startsWith('/admin/login?')) {
-    return NextResponse.next();
-  }
-
-  // ── Resto del admin — verificar cookie de sesión ──────────────────────────
+  // ── Rutas admin — la protección se hace en cada layout/page con auth() ────
+  // El middleware NO toca /admin para evitar problemas con Edge Runtime
   if (pathname.startsWith('/admin')) {
-    // Verificar si existe la cookie de sesión de NextAuth v5
-    const sessionToken =
-      req.cookies.get('authjs.session-token')?.value ??
-      req.cookies.get('__Secure-authjs.session-token')?.value ??
-      req.cookies.get('next-auth.session-token')?.value ??
-      req.cookies.get('__Secure-next-auth.session-token')?.value;
-
-    if (!sessionToken) {
-      const loginUrl = new URL('/admin/login', req.url);
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
     return NextResponse.next();
   }
 

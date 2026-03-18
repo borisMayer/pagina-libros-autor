@@ -2,7 +2,11 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AdminSidebar from '@/components/admin/Sidebar';
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
   if ((session?.user as { role?: string })?.role !== 'ADMIN') {
     redirect('/admin/login');
