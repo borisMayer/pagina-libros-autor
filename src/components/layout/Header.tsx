@@ -3,6 +3,10 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import { useState } from 'react';
+import type { routing } from '@/i18n/routing';
+import type { ComponentProps } from 'react';
+
+type Href = ComponentProps<typeof Link>['href'];
 
 export default function Header() {
   const nav = useTranslations('nav');
@@ -13,7 +17,8 @@ export default function Header() {
 
   const toggleLocale = () => {
     const next = locale === 'es' ? 'en' : 'es';
-    router.replace(pathname, { locale: next });
+    // Cast pathname to a valid href type — usePathname returns internal path
+    router.replace(pathname as Href, { locale: next });
   };
 
   return (

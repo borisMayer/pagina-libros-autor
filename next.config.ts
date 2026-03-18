@@ -4,6 +4,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Next.js 15: moved from experimental.serverComponentsExternalPackages
+  serverExternalPackages: ['@prisma/client', 'bcryptjs'],
+
   images: {
     remotePatterns: [
       {
@@ -15,12 +18,6 @@ const nextConfig: NextConfig = {
         hostname: 'placehold.co',
       },
     ],
-  },
-
-  // Silence jose/Edge Runtime warnings — these are warnings only, not errors
-  // jose uses Node.js APIs but only in non-edge contexts (API routes/server)
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
   },
 
   async headers() {
