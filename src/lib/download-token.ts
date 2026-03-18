@@ -1,14 +1,20 @@
 import crypto from 'crypto';
 
 const SECRET = process.env.DOWNLOAD_TOKEN_SECRET ?? 'dev-secret-change-in-production';
-const EXPIRY_MS = 30 * 60 * 1000; // 30 minutos
 
-export function generateDownloadToken(saleId: string): {
-  token: string;
-  expiresAt: Date;
-} {
-  const expiresAt = new Date(Date.now() + EXPIRY_MS);
-  const payload = `${saleId}:${expiresAt.getTime()}`;
+// 7 días para enlaces enviados por email
+const EMAIL_EXPIRY_MS  = 7 * 24 * 60 * 60 * 1000;
+// 30 minutos para acceso directo desde la página de éxito
+const DIRECT_EXPIRY_MS = 30 * 60 * 1000;
+
+export function generateDownloadToken(
+  saleId: string,
+  type: 'email' | 'direct' = 'direct'
+): { token: string; expiresAt: Date } {
+  const expiresAt = new Date(
+    Date.now() + (type === 'email' ? EMAIL_EXPIRY_MS : DIRECT_EXPIRY_MS)
+  );
+  const payload   = `${saleId}:${expiresAt.getTime()}`;
   const signature = crypto
     .createHmac('sha256', SECRET)
     .update(payload)
@@ -24,23 +30,23 @@ export function verifyDownloadToken(token: string): {
 } {
   try {
     const decoded = Buffer.from(token, 'base64url').toString('utf-8');
-    const parts = decoded.split(':');
+    const parts   = decoded.split(':');
     if (parts.length !== 3) return { valid: false };
 
     const [saleId, expiresAtStr, signature] = parts;
 
     if (Date.now() > parseInt(expiresAtStr)) {
-      return { valid: false }; // Expirado
+      return { valid: false };
     }
 
-    const payload = `${saleId}:${expiresAtStr}`;
+    const payload           = `${saleId}:${expiresAtStr}`;
     const expectedSignature = crypto
       .createHmac('sha256', SECRET)
       .update(payload)
       .digest('hex');
 
     const isValid = crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
+      Buffer.from(signature,         'hex'),
       Buffer.from(expectedSignature, 'hex')
     );
 
