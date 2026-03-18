@@ -16,6 +16,10 @@
   "dependencies": {
     "@mercadopago/sdk-js": "^0.0.3",
     "@prisma/client": "^5.22.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.3",
     "@vercel/blob": "^0.27.0",
@@ -32,9 +36,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "15.5.12",
     "prisma": "^5.22.0",
