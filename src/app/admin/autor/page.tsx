@@ -10,8 +10,10 @@ export default async function AdminAutorPage() {
   });
 
   return (
-    <div className="animate-fadeIn max-w-3xl">
-      <h1 className="font-display text-3xl font-bold text-ink mb-8">Editar autor</h1>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1a1a2e', maxWidth: '720px' }}>
+      <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, marginBottom: '28px' }}>
+        Editar autor
+      </h1>
       <AuthorForm initialData={author} />
     </div>
   );

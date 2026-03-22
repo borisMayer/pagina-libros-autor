@@ -3,66 +3,67 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Ventas — Admin' };
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  APPROVED:   { label: 'Aprobada',    color: 'bg-green-100 text-green-800' },
-  PENDING:    { label: 'Pendiente',   color: 'bg-yellow-100 text-yellow-800' },
-  REJECTED:   { label: 'Rechazada',   color: 'bg-red-100 text-red-800' },
-  PROCESSING: { label: 'Procesando',  color: 'bg-blue-100 text-blue-800' },
-  REFUNDED:   { label: 'Reembolsada', color: 'bg-purple-100 text-purple-800' },
-  CANCELLED:  { label: 'Cancelada',   color: 'bg-gray-100 text-gray-600' },
+const STATUS: Record<string, [string, string]> = {
+  APPROVED:   ['Aprobada',    '#dcfce7/#15803d'],
+  PENDING:    ['Pendiente',   '#fef9c3/#854d0e'],
+  REJECTED:   ['Rechazada',   '#fee2e2/#dc2626'],
+  PROCESSING: ['Procesando',  '#dbeafe/#1d4ed8'],
+  REFUNDED:   ['Reembolsada', '#f3e8ff/#7e22ce'],
+  CANCELLED:  ['Cancelada',   '#f3f4f6/#6b7280'],
 };
 
 export default async function AdminVentasPage() {
   const sales = await prisma.sale.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
-      book: { select: { titleEs: true, coverUrl: true } },
+      book:         { select: { titleEs: true, coverUrl: true } },
       downloadLogs: true,
     },
   });
 
   return (
-    <div className="animate-fadeIn">
-      <h1 className="font-display text-3xl font-bold text-ink mb-8">Ventas</h1>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
+      <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, marginBottom: '28px' }}>Ventas</h1>
 
       {sales.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-          <p className="text-4xl mb-4">💳</p>
-          <p className="font-body text-ink/50">No hay ventas aún.</p>
+        <div style={{ textAlign: 'center', padding: '60px 20px', background: '#fff', borderRadius: '16px', border: '1px solid #f0ede6' }}>
+          <p style={{ fontSize: '40px', marginBottom: '12px' }}>💳</p>
+          <p style={{ color: '#9ca3af' }}>No hay ventas aún.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm font-body">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
+        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #f0ede6', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+              <thead>
+                <tr style={{ background: '#fafafa', borderBottom: '2px solid #f0ede6' }}>
                   {['Libro', 'Comprador', 'Monto', 'Estado', 'Descargas', 'Fecha'].map(h => (
-                    <th key={h} className="text-left py-3 px-4 text-ink/50 font-semibold">{h}</th>
+                    <th key={h} style={{ textAlign: 'left', padding: '12px 16px', color: '#9ca3af', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {sales.map(sale => {
-                  const st = STATUS_LABELS[sale.status] ?? { label: sale.status, color: 'bg-gray-100' };
+                  const [label, colors] = STATUS[sale.status] ?? ['Desconocido', '#f3f4f6/#6b7280'];
+                  const [bg, fg] = colors.split('/');
                   return (
-                    <tr key={sale.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-ink max-w-[160px] truncate">{sale.book.titleEs}</td>
-                      <td className="py-3 px-4 text-ink/70">
+                    <tr key={sale.id} style={{ borderBottom: '1px solid #fafafa' }}>
+                      <td style={{ padding: '12px 16px', fontWeight: 500 }}>{sale.book.titleEs}</td>
+                      <td style={{ padding: '12px 16px', color: '#6b7280' }}>
                         <div>{sale.buyerEmail}</div>
-                        {sale.buyerName && <div className="text-xs text-ink/40">{sale.buyerName}</div>}
+                        {sale.buyerName && <div style={{ fontSize: '12px', color: '#9ca3af' }}>{sale.buyerName}</div>}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-ink">
-                        {new Intl.NumberFormat('es-AR', { style: 'currency', currency: sale.currency }).format(Number(sale.amount))}
+                      <td style={{ padding: '12px 16px', fontWeight: 600 }}>
+                        {new Intl.NumberFormat('es-AR', { style: 'currency', currency: sale.currency, minimumFractionDigits: 0 }).format(Number(sale.amount))}
                       </td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${st.color}`}>
-                          {st.label}
+                      <td style={{ padding: '12px 16px' }}>
+                        <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: bg, color: fg }}>
+                          {label}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center text-ink/50">
+                      <td style={{ padding: '12px 16px', textAlign: 'center', color: '#6b7280' }}>
                         {sale.downloadLogs.length}/{sale.maxDownloads}
                       </td>
-                      <td className="py-3 px-4 text-ink/50 whitespace-nowrap">
+                      <td style={{ padding: '12px 16px', color: '#9ca3af', whiteSpace: 'nowrap' }}>
                         {sale.createdAt.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                       </td>
                     </tr>

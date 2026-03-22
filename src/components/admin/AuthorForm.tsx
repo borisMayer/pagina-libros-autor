@@ -11,46 +11,33 @@ interface AuthorData {
   milestones?: Milestone[];
 }
 
+const inp: React.CSSProperties = { width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: '14px', outline: 'none', boxSizing: 'border-box', fontFamily: 'system-ui' };
+const lbl: React.CSSProperties = { display: 'block', fontSize: '11px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' };
+const card: React.CSSProperties = { background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #f0ede6', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', marginBottom: '20px' };
+const grid2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' };
+
 export default function AuthorForm({ initialData }: { initialData: AuthorData | null }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
   const [form, setForm] = useState({
-    nameEs: initialData?.nameEs ?? '',
-    nameEn: initialData?.nameEn ?? '',
-    bioEs:  initialData?.bioEs  ?? '',
-    bioEn:  initialData?.bioEn  ?? '',
+    nameEs: initialData?.nameEs ?? '', nameEn: initialData?.nameEn ?? '',
+    bioEs: initialData?.bioEs ?? '', bioEn: initialData?.bioEn ?? '',
     photoUrl: initialData?.photoUrl ?? '',
     birthDate: initialData?.birthDate ? new Date(initialData.birthDate).toISOString().split('T')[0] : '',
-    nationality: initialData?.nationality ?? '',
-    website:   initialData?.website   ?? '',
-    twitter:   initialData?.twitter   ?? '',
-    instagram: initialData?.instagram ?? '',
+    nationality: initialData?.nationality ?? '', website: initialData?.website ?? '',
+    twitter: initialData?.twitter ?? '', instagram: initialData?.instagram ?? '',
   });
-
-  const [milestones, setMilestones] = useState<Milestone[]>(
-    initialData?.milestones ?? []
-  );
+  const [milestones, setMilestones] = useState<Milestone[]>(initialData?.milestones ?? []);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
 
-  const addMilestone = () =>
-    setMilestones(m => [...m, { year: new Date().getFullYear(), labelEs: '', labelEn: '' }]);
-
-  const removeMilestone = (i: number) =>
-    setMilestones(m => m.filter((_, idx) => idx !== i));
-
-  const updateMilestone = (i: number, k: keyof Milestone, v: string | number) =>
-    setMilestones(m => m.map((ms, idx) => idx === i ? { ...ms, [k]: v } : ms));
-
   const handleSave = async () => {
-    setSaving(true);
-    setMsg('');
+    setSaving(true); setMsg('');
     const res = await fetch('/api/author', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...form, milestones }),
     });
     setSaving(false);
@@ -58,53 +45,64 @@ export default function AuthorForm({ initialData }: { initialData: AuthorData | 
     else setMsg('❌ Error al guardar');
   };
 
-  const inputCls = 'w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-500 focus:outline-none font-body text-ink';
-  const labelCls = 'block text-xs font-semibold text-ink/60 uppercase tracking-wide mb-2 font-body';
-
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label className={labelCls}>Nombre (ES)</label><input className={inputCls} value={form.nameEs} onChange={set('nameEs')} /></div>
-        <div><label className={labelCls}>Nombre (EN)</label><input className={inputCls} value={form.nameEn} onChange={set('nameEn')} /></div>
-      </div>
-
-      <div><label className={labelCls}>Biografía (ES)</label><textarea className={inputCls} rows={5} value={form.bioEs} onChange={set('bioEs')} /></div>
-      <div><label className={labelCls}>Biografía (EN)</label><textarea className={inputCls} rows={5} value={form.bioEn} onChange={set('bioEn')} /></div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label className={labelCls}>URL de foto</label><input className={inputCls} value={form.photoUrl} onChange={set('photoUrl')} placeholder="https://..." /></div>
-        <div><label className={labelCls}>Fecha de nacimiento</label><input type="date" className={inputCls} value={form.birthDate} onChange={set('birthDate')} /></div>
-        <div><label className={labelCls}>Nacionalidad</label><input className={inputCls} value={form.nationality} onChange={set('nationality')} /></div>
-        <div><label className={labelCls}>Sitio web</label><input className={inputCls} value={form.website} onChange={set('website')} /></div>
-        <div><label className={labelCls}>Twitter</label><input className={inputCls} value={form.twitter} onChange={set('twitter')} placeholder="usuario (sin @)" /></div>
-        <div><label className={labelCls}>Instagram</label><input className={inputCls} value={form.instagram} onChange={set('instagram')} placeholder="usuario (sin @)" /></div>
-      </div>
-
-      {/* Milestones */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <label className={labelCls + ' mb-0'}>Cronología biográfica</label>
-          <button onClick={addMilestone} className="text-xs text-brand-600 font-semibold hover:underline font-body">+ Agregar</button>
+    <div>
+      <div style={card}>
+        <h2 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 600 }}>Información básica</h2>
+        <div style={grid2}>
+          <div><label style={lbl}>Nombre (ES)</label><input style={inp} value={form.nameEs} onChange={set('nameEs')} /></div>
+          <div><label style={lbl}>Nombre (EN)</label><input style={inp} value={form.nameEn} onChange={set('nameEn')} /></div>
         </div>
-        <div className="space-y-3">
+        <div style={{ marginTop: '16px' }}>
+          <label style={lbl}>Biografía (ES)</label>
+          <textarea style={{ ...inp, minHeight: '120px', resize: 'vertical' }} value={form.bioEs} onChange={set('bioEs')} />
+        </div>
+        <div style={{ marginTop: '16px' }}>
+          <label style={lbl}>Biografía (EN)</label>
+          <textarea style={{ ...inp, minHeight: '120px', resize: 'vertical' }} value={form.bioEn} onChange={set('bioEn')} />
+        </div>
+      </div>
+
+      <div style={card}>
+        <h2 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 600 }}>Datos de contacto</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div><label style={lbl}>URL de foto</label><input style={inp} value={form.photoUrl} onChange={set('photoUrl')} placeholder="https://..." /></div>
+          <div><label style={lbl}>Fecha de nacimiento</label><input type="date" style={inp} value={form.birthDate} onChange={set('birthDate')} /></div>
+          <div><label style={lbl}>Nacionalidad</label><input style={inp} value={form.nationality} onChange={set('nationality')} /></div>
+          <div><label style={lbl}>Sitio web</label><input style={inp} value={form.website} onChange={set('website')} /></div>
+          <div><label style={lbl}>Twitter</label><input style={inp} value={form.twitter} onChange={set('twitter')} placeholder="usuario (sin @)" /></div>
+          <div><label style={lbl}>Instagram</label><input style={inp} value={form.instagram} onChange={set('instagram')} placeholder="usuario (sin @)" /></div>
+        </div>
+      </div>
+
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Cronología</h2>
+          <button onClick={() => setMilestones(m => [...m, { year: new Date().getFullYear(), labelEs: '', labelEn: '' }])}
+            style={{ background: '#f0f4ff', color: '#4a52ea', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+            + Agregar
+          </button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {milestones.map((ms, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <input type="number" className="w-20 px-2 py-2 rounded-xl border border-gray-200 text-sm font-body" value={ms.year}
-                onChange={e => updateMilestone(i, 'year', parseInt(e.target.value))} />
-              <input className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm font-body" placeholder="Evento (ES)" value={ms.labelEs}
-                onChange={e => updateMilestone(i, 'labelEs', e.target.value)} />
-              <input className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm font-body" placeholder="Event (EN)" value={ms.labelEn}
-                onChange={e => updateMilestone(i, 'labelEn', e.target.value)} />
-              <button onClick={() => removeMilestone(i)} className="text-red-400 hover:text-red-600 px-2 py-2">✕</button>
+            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <input type="number" style={{ ...inp, width: '80px', flexShrink: 0 }} value={ms.year}
+                onChange={e => setMilestones(m => m.map((x, j) => j === i ? { ...x, year: parseInt(e.target.value) } : x))} />
+              <input style={{ ...inp, flex: 1 }} placeholder="Evento (ES)" value={ms.labelEs}
+                onChange={e => setMilestones(m => m.map((x, j) => j === i ? { ...x, labelEs: e.target.value } : x))} />
+              <input style={{ ...inp, flex: 1 }} placeholder="Event (EN)" value={ms.labelEn}
+                onChange={e => setMilestones(m => m.map((x, j) => j === i ? { ...x, labelEn: e.target.value } : x))} />
+              <button onClick={() => setMilestones(m => m.filter((_, j) => j !== i))}
+                style={{ background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', padding: '8px 12px', cursor: 'pointer', fontWeight: 700 }}>✕</button>
             </div>
           ))}
         </div>
       </div>
 
-      {msg && <p className="font-body text-sm">{msg}</p>}
+      {msg && <p style={{ marginBottom: '16px', fontSize: '14px' }}>{msg}</p>}
 
       <button onClick={handleSave} disabled={saving}
-        className="px-6 py-3 bg-ink hover:bg-brand-900 text-white font-bold rounded-xl transition-all font-body disabled:opacity-60">
+        style={{ padding: '12px 28px', background: '#1a1a2e', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>
         {saving ? 'Guardando...' : 'Guardar cambios'}
       </button>
     </div>
