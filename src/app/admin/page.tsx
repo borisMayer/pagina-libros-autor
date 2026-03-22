@@ -1,7 +1,13 @@
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Dashboard — Admin' };
+
+const card = (bg = '#fff'): React.CSSProperties => ({
+  background: bg, borderRadius: '16px', padding: '20px 24px',
+  border: '1px solid #f0ede6', boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+});
 
 export default async function AdminDashboardPage() {
   const [totalSales, totalApproved, totalBooks, recentSales] = await Promise.all([
@@ -9,59 +15,63 @@ export default async function AdminDashboardPage() {
     prisma.sale.count({ where: { status: 'APPROVED' } }),
     prisma.book.count(),
     prisma.sale.findMany({
-      where:   { status: 'APPROVED' },
-      take:    10,
+      where: { status: 'APPROVED' }, take: 10,
       orderBy: { createdAt: 'desc' },
       include: { book: { select: { titleEs: true } } },
     }),
   ]);
 
-  // Revenue by currency
   const revenueGroups = await prisma.sale.groupBy({
-    by:     ['currency'],
-    where:  { status: 'APPROVED' },
-    _sum:   { amount: true },
+    by: ['currency'], where: { status: 'APPROVED' }, _sum: { amount: true },
   });
 
   const STATUS_COLORS: Record<string, string> = {
-    APPROVED: 'bg-green-100 text-green-800',
-    PENDING:  'bg-yellow-100 text-yellow-800',
-    REJECTED: 'bg-red-100 text-red-800',
-    PROCESSING: 'bg-blue-100 text-blue-800',
+    APPROVED: '#dcfce7', PENDING: '#fef9c3', REJECTED: '#fee2e2',
+    PROCESSING: '#dbeafe', REFUNDED: '#f3e8ff', CANCELLED: '#f3f4f6',
+  };
+  const STATUS_TEXT: Record<string, string> = {
+    APPROVED: '#15803d', PENDING: '#854d0e', REJECTED: '#dc2626',
+    PROCESSING: '#1d4ed8', REFUNDED: '#7e22ce', CANCELLED: '#6b7280',
+  };
+  const STATUS_LABELS: Record<string, string> = {
+    APPROVED: 'Aprobada', PENDING: 'Pendiente', REJECTED: 'Rechazada',
+    PROCESSING: 'Procesando', REFUNDED: 'Reembolsada', CANCELLED: 'Cancelada',
   };
 
   return (
-    <div className="animate-fadeIn">
-      <h1 className="font-display text-3xl font-bold text-ink mb-8">Panel de control</h1>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: '#1a1a2e' }}>
+      <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 700, marginBottom: '28px' }}>
+        Panel de control
+      </h1>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '28px' }}>
         {[
-          { label: 'Ventas totales',    value: totalSales,    icon: '📊' },
-          { label: 'Ventas aprobadas',  value: totalApproved, icon: '✅' },
-          { label: 'Libros publicados', value: totalBooks,    icon: '📚' },
-          { label: 'Monedas activas',   value: revenueGroups.length, icon: '💱' },
+          { label: 'Ventas totales',    value: totalSales,          icon: '📊', color: '#ede9fe' },
+          { label: 'Ventas aprobadas',  value: totalApproved,       icon: '✅', color: '#dcfce7' },
+          { label: 'Libros publicados', value: totalBooks,           icon: '📚', color: '#dbeafe' },
+          { label: 'Monedas activas',   value: revenueGroups.length, icon: '💱', color: '#fef9c3' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl">{stat.icon}</span>
-              <p className="text-sm text-ink/50 font-body">{stat.label}</p>
+          <div key={stat.label} style={{ ...card(stat.color), display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '24px' }}>{stat.icon}</span>
+            <div>
+              <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>{stat.label}</p>
+              <p style={{ margin: '2px 0 0', fontSize: '28px', fontWeight: 700 }}>{stat.value}</p>
             </div>
-            <p className="font-display text-4xl font-bold text-ink">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Revenue by currency */}
+      {/* Revenue */}
       {revenueGroups.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-10">
-          <h2 className="font-display text-xl font-bold text-ink mb-4">Ingresos por moneda</h2>
-          <div className="flex flex-wrap gap-4">
+        <div style={{ ...card(), marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', marginTop: 0 }}>Ingresos por moneda</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             {revenueGroups.map(g => (
-              <div key={g.currency} className="bg-brand-50 border border-brand-200 rounded-xl px-5 py-3">
-                <p className="text-xs text-brand-600 font-semibold font-body">{g.currency}</p>
-                <p className="font-display text-2xl font-bold text-ink">
-                  {new Intl.NumberFormat('es-AR', { style: 'currency', currency: g.currency }).format(Number(g._sum.amount ?? 0))}
+              <div key={g.currency} style={{ background: '#f0f4ff', borderRadius: '10px', padding: '10px 16px' }}>
+                <p style={{ margin: 0, fontSize: '11px', color: '#4a52ea', fontWeight: 600 }}>{g.currency}</p>
+                <p style={{ margin: '2px 0 0', fontSize: '20px', fontWeight: 700 }}>
+                  {new Intl.NumberFormat('es-AR', { style: 'currency', currency: g.currency, minimumFractionDigits: 0 }).format(Number(g._sum.amount ?? 0))}
                 </p>
               </div>
             ))}
@@ -69,37 +79,47 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
+      {/* Quick actions */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <Link href="/admin/libros/nuevo" style={{ padding: '10px 20px', background: '#1a1a2e', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          + Nuevo libro
+        </Link>
+        <Link href="/admin/autor" style={{ padding: '10px 20px', background: '#f0f4ff', color: '#4a52ea', borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          Editar autor
+        </Link>
+      </div>
+
       {/* Recent sales */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="font-display text-xl font-bold text-ink mb-4">Ventas recientes</h2>
+      <div style={card()}>
+        <h2 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', marginTop: 0 }}>Ventas recientes</h2>
         {recentSales.length === 0 ? (
-          <p className="text-ink/40 font-body text-sm">No hay ventas aún.</p>
+          <p style={{ color: '#9ca3af', fontSize: '14px', textAlign: 'center', padding: '24px 0' }}>
+            No hay ventas aún. <Link href="/admin/libros/nuevo" style={{ color: '#4a52ea' }}>Carga tu primer libro →</Link>
+          </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm font-body">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left py-3 px-2 text-ink/50 font-semibold">Libro</th>
-                  <th className="text-left py-3 px-2 text-ink/50 font-semibold">Comprador</th>
-                  <th className="text-left py-3 px-2 text-ink/50 font-semibold">Monto</th>
-                  <th className="text-left py-3 px-2 text-ink/50 font-semibold">Estado</th>
-                  <th className="text-left py-3 px-2 text-ink/50 font-semibold">Fecha</th>
+                <tr style={{ borderBottom: '2px solid #f0ede6' }}>
+                  {['Libro', 'Comprador', 'Monto', 'Estado', 'Fecha'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '8px 12px', color: '#9ca3af', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {recentSales.map(sale => (
-                  <tr key={sale.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-2 font-medium text-ink">{sale.book.titleEs}</td>
-                    <td className="py-3 px-2 text-ink/70">{sale.buyerEmail}</td>
-                    <td className="py-3 px-2 font-semibold text-ink">
-                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: sale.currency }).format(Number(sale.amount))}
+                  <tr key={sale.id} style={{ borderBottom: '1px solid #fafafa' }}>
+                    <td style={{ padding: '10px 12px', fontWeight: 500 }}>{sale.book.titleEs}</td>
+                    <td style={{ padding: '10px 12px', color: '#6b7280' }}>{sale.buyerEmail}</td>
+                    <td style={{ padding: '10px 12px', fontWeight: 600 }}>
+                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: sale.currency, minimumFractionDigits: 0 }).format(Number(sale.amount))}
                     </td>
-                    <td className="py-3 px-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[sale.status] ?? 'bg-gray-100'}`}>
-                        {sale.status}
+                    <td style={{ padding: '10px 12px' }}>
+                      <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, background: STATUS_COLORS[sale.status] ?? '#f3f4f6', color: STATUS_TEXT[sale.status] ?? '#6b7280' }}>
+                        {STATUS_LABELS[sale.status] ?? sale.status}
                       </span>
                     </td>
-                    <td className="py-3 px-2 text-ink/50">
+                    <td style={{ padding: '10px 12px', color: '#9ca3af' }}>
                       {sale.createdAt.toLocaleDateString('es-AR')}
                     </td>
                   </tr>

@@ -14,16 +14,16 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'nav' });
+  await getTranslations({ locale, namespace: 'nav' });
   return {
     title: {
       template: '%s | Andrew Myer',
-      default: 'Andrew Myer — Escritor',
+      default:  'Andrew Myer — Escritor',
     },
     description:
       locale === 'es'
         ? 'Sitio oficial de Andrew Myer, escritor. Descubre sus libros, su biografía y compra sus obras digitales.'
-        : 'Official site of Andrew Myer, Argentine writer. Discover his books, biography and purchase his digital works.',
+        : 'Official site of Andrew Myer, writer. Discover his books, biography and purchase his digital works.',
     openGraph: {
       siteName: 'Andrew Myer',
       locale:    locale === 'es' ? 'es_AR' : 'en_US',
@@ -46,7 +46,15 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale}>
-      <body className="min-h-screen bg-parchment font-body text-ink flex flex-col">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet" />
+      </head>
+      <body
+        className="min-h-screen bg-parchment font-body text-ink flex flex-col"
+        style={{ margin: 0, backgroundColor: '#fdf8f0', fontFamily: "'Source Sans 3', system-ui, sans-serif" }}
+      >
         <NextIntlClientProvider messages={messages}>
           <Header />
           <main className="flex-1">{children}</main>
