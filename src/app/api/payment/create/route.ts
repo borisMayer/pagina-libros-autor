@@ -4,6 +4,28 @@ import { mpClient } from '@/lib/mercadopago';
 import { Preference } from 'mercadopago';
 import { z } from 'zod';
 
+const ALLOWED_ORIGINS = [
+  'https://andrewmyer.com',
+  'https://www.andrewmyer.com',
+  'https://andrew-myer-3d.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3001',
+];
+
+function corsHeaders(origin: string | null) {
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin':  allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+}
+
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
+}
+
 const schema = z.object({
   bookId:     z.string().cuid(),
   currency:   z.enum(['ARS', 'USD', 'EUR', 'MXN', 'CLP', 'COP']),
@@ -13,77 +35,70 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const origin = req.headers.get('origin');
+  const cors   = corsHeaders(origin);
+
+  const body   = await req.json();
   const parsed = schema.safeParse(body);
 
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Datos inválidos', details: parsed.error.flatten() },
+      { status: 400, headers: cors }
+    );
   }
 
   const { bookId, currency, buyerEmail, buyerName, locale } = parsed.data;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
-  // Buscar libro y precio
   const book = await prisma.book.findUnique({
-    where: { id: bookId, isPublished: true },
+    where:   { id: bookId, isPublished: true },
     include: { prices: { where: { currency, isActive: true } } },
   });
 
   if (!book || book.prices.length === 0) {
-    return NextResponse.json({ error: 'Libro o precio no disponible' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'Libro o precio no disponible' },
+      { status: 404, headers: cors }
+    );
   }
 
   const price = book.prices[0];
 
-  // Crear venta en estado PENDING
   const sale = await prisma.sale.create({
-    data: {
-      bookId,
-      buyerEmail,
-      buyerName,
-      amount: price.amount,
-      currency,
-      status: 'PENDING',
-    },
+    data: { bookId, buyerEmail, buyerName, amount: price.amount, currency, status: 'PENDING' },
   });
 
-  // Crear preferencia en Mercado Pago
   const preferenceClient = new Preference(mpClient);
   const preference = await preferenceClient.create({
     body: {
-      items: [
-        {
-          id:         book.id,
-          title:      locale === 'es' ? book.titleEs : book.titleEn,
-          quantity:   1,
-          unit_price: Number(price.amount),
-          currency_id: currency,
-        },
-      ],
-      payer: {
-        email: buyerEmail,
-        name:  buyerName,
-      },
+      items: [{
+        id:          book.id,
+        title:       locale === 'es' ? book.titleEs : book.titleEn,
+        quantity:    1,
+        unit_price:  Number(price.amount),
+        currency_id: currency,
+      }],
+      payer: { email: buyerEmail, name: buyerName },
       back_urls: {
         success: `${appUrl}/${locale}/pago/exito?sale_id=${sale.id}`,
         failure: `${appUrl}/${locale}/pago/error?sale_id=${sale.id}`,
         pending: `${appUrl}/${locale}/pago/exito?sale_id=${sale.id}`,
       },
-      auto_return:           'approved',
-      notification_url:     `${appUrl}/api/webhook/mercadopago`,
-      external_reference:   sale.id,
-      statement_descriptor: 'LIBROS',
+      auto_return:          'approved',
+      notification_url:    `${appUrl}/api/webhook/mercadopago`,
+      external_reference:  sale.id,
+      statement_descriptor:'LIBROS ANDREW MYER',
     },
   });
 
-  // Guardar preferenceId
   await prisma.sale.update({
-    where:  { id: sale.id },
-    data:   { mpPreferenceId: preference.id },
+    where: { id: sale.id },
+    data:  { mpPreferenceId: preference.id },
   });
 
-  return NextResponse.json({
-    checkoutUrl: preference.init_point,
-    saleId:      sale.id,
-  });
+  return NextResponse.json(
+    { checkoutUrl: preference.init_point, saleId: sale.id },
+    { headers: cors }
+  );
 }
